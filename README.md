@@ -147,11 +147,8 @@ The AMI is resolved dynamically at plan time using filters for the latest offici
 
 ## Notes
 
-This project is part of a portfolio documenting a career transition from video production into cloud infrastructure and DevOps. It is intentionally built in the open to demonstrate real decision-making, including trade-offs and incremental improvements — not just the finished result.
-
-The target workload is a static personal site on a .dev domain — 
-intentionally simple, with infrastructure complexity focused on 
-security and reproducibility rather than scale.
+This project is intentionally built in the open - documenting real decisions, trade-offs,and incremental improvements as the infrastructure evolves.
+The target workload is a static personal site on a .dev domain, with complexity focused on security and reproducibility rather than scale.
 
 ---
 
