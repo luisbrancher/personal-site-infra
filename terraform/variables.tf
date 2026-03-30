@@ -15,3 +15,9 @@ variable "project_name" {
   type        = string
   default     = "debian-server"
 }
+
+variable "ssh_public_key" {
+  description = "ED25519 public key for SSH access"
+  type        = string
+  sensitive   = true
+}

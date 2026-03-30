@@ -1,7 +1,7 @@
 # cria par de chaves para SSH
 resource "aws_key_pair" "chave_ssh" {
   key_name   = "chave-debian-server"
-  public_key = file(pathexpand("~/.ssh/id_ed25519.pub"))
+  public_key = var.ssh_public_key
 }
 
 # acha a imagem oficial mais recente do Debian 13 ARM
