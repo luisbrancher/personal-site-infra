@@ -114,7 +114,7 @@ resource "aws_iam_policy" "ec2_minimal" {
         Sid      = "DenyNonFreeTierInstances"
         Effect   = "Deny"
         Action   = "ec2:RunInstances"
-        Resource = "*"
+        Resource = "arn:aws:ec2:*:*:instance/*"
         Condition = {
           StringNotEquals = {
             "ec2:InstanceType" = "t4g.micro"
