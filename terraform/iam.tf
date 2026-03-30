@@ -93,6 +93,8 @@ resource "aws_iam_policy" "ec2_minimal" {
           "iam:ListPolicyVersions",
           "iam:TagPolicy",
           "iam:UntagPolicy",
+          "iam:CreatePolicyVersion",
+          "iam:DeletePolicyVersion",
           # usuario
           "iam:CreateUser",
           "iam:DeleteUser",
