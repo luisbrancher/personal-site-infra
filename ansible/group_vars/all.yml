@@ -1,0 +1,8 @@
+# dominio do site
+domain_name: "luisbrancher.dev"
+
+# dir onde os arquivos do site ficam
+site_root: "/var/www/{{ domain_name }}"
+
+# tailscale key
+tailscale_auth_key: "{{ vault_tailscale_auth_key }}"

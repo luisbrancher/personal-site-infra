@@ -1,0 +1,101 @@
+--- # inicio YAML
+
+- name: Configurar servidor do site estático  # nome descritivo do play
+  hosts: webservers                            # hosts do inventory que se aplica
+  become: true                                # equivale a "sudo" 
+
+  pre_tasks:
+    # atualiza o cache antes de instalar pacotes - apt-get update
+    - name: Atualizar cache do apt
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600  # só atualiza se o cache tiver mais de 1h
+
+  # BLOCO 1 — NGINX
+  
+  tasks:
+    - name: Instalar o nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present  # "present" = instala se não tiver - "absent" = remove - "latest" = atualiza
+
+    - name: Criar diretório raiz do site
+      ansible.builtin.file:
+        path: "{{ site_root }}"
+        state: directory
+        owner: www-data   # usuário do nginx
+        group: www-data
+        mode: "0755"
+
+    - name: Aplicar configuração do nginx (via template)
+      ansible.builtin.template:
+        src: templates/nginx.conf.j2   # arquivo local na sua máquina
+        dest: /etc/nginx/sites-available/{{ domain_name }}
+        mode: "0644"
+      notify: Reiniciar nginx  # dispara o handler abaixo só se houve mudança
+
+    - name: Ativar o site (criar symlink em sites-enabled)
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/{{ domain_name }}
+        dest: /etc/nginx/sites-enabled/{{ domain_name }}
+        state: link
+
+    - name: Remover o site padrão do nginx
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reiniciar nginx
+
+    - name: Garantir que o nginx está rodando e habilitado no boot
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+  # BLOCO 2 — GIT
+ 
+    - name: Instalar git
+      ansible.builtin.apt:
+        name: git
+        state: present
+
+    - name: Clonar o repositório do site
+      ansible.builtin.git:
+        repo: "https://github.com/luisbrancher/luisbrancher.github.io.git"
+        dest: "{{ site_root }}"
+        version: main
+        force: true
+
+    - name: Corrigir ownership dos arquivos do site
+      ansible.builtin.file:
+        path: "{{ site_root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        recurse: true  # aplica em todos os arquivos dentro do diretório
+
+  # BLOCO 3 — TAILSCALE
+
+    - name: Baixar e rodar o script de instalação do Tailscale
+      ansible.builtin.shell:
+        cmd: curl -fsSL https://tailscale.com/install.sh | sh
+        creates: /usr/bin/tailscale  # idempotência: só roda se o binário ainda não existir
+
+    - name: Conectar ao Tailscale com a auth key
+      ansible.builtin.command:
+        cmd: tailscale up --authkey="{{ tailscale_auth_key }}"
+        creates: /var/lib/tailscale/tailscaled.state  # idem — evita reconectar toda vez
+
+    - name: Garantir que o tailscaled está rodando no boot
+      ansible.builtin.service:
+        name: tailscaled
+        state: started
+        enabled: true
+
+  # HANDLERS — rodam no final se "notify" foi acionado
+
+  handlers:
+    - name: Reiniciar nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
