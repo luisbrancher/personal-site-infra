@@ -55,12 +55,24 @@ resource "aws_security_group" "web_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # SSH
+  # HTTP - cloudflare origin
   ingress {
-    from_port   = 22
-    to_port     = 22
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Migrar para tailscale | usando global pois codei em viagem e nao possuia IP fixo
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # SSH
+
+  dynamic "ingress" {
+    for_each = var.enable_ssh ? [1] : [] # variavel bool pra abrir ou não a porta
+    content {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"] # Migrar para tailscale | usando global pois codei em viagem e nao possuia IP fixo
+    }
   }
 
   # server can access the web
