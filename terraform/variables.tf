@@ -21,3 +21,9 @@ variable "ssh_public_key" {
   type        = string
   sensitive   = true
 }
+
+variable "enable_ssh" {
+  description = "Abre porta 22 para bootstrap. Fechar após Tailscale configurado."
+  type        = bool
+  default     = true # true abre porta 22 | false não
+}
