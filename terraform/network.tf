@@ -40,6 +40,26 @@ resource "aws_route_table_association" "public_assoc" {
   route_table_id = aws_route_table.public_rt.id
 }
 
+# IPs Cloudflare (cloudflare.com/ips)
+locals {
+  cloudflare_ips = [
+    "173.245.48.0/20",
+    "103.21.244.0/22",
+    "103.22.200.0/22",
+    "103.31.4.0/22",
+    "141.101.64.0/18",
+    "108.162.192.0/18",
+    "190.93.240.0/20",
+    "188.114.96.0/20",
+    "197.234.240.0/22",
+    "198.41.128.0/17",
+    "162.158.0.0/15",
+    "104.16.0.0/13",
+    "104.24.0.0/14",
+    "172.64.0.0/13",
+    "131.0.72.0/22"
+  ]
+}
 
 # Security Group para liberar o tráfego do site
 resource "aws_security_group" "web_sg" {
@@ -47,20 +67,23 @@ resource "aws_security_group" "web_sg" {
   description = "Acesso seguro para dominio .dev"
   vpc_id      = aws_vpc.main_vpc.id # vincula o SG a VPC
 
-  # HTTPS
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # HTTPS (dasativado por usar porta 80 cloudflare - AWS)
+#  ingress {
+#    from_port   = 443
+#    to_port     = 443
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
 
-  # HTTP - cloudflare origin
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  # HTTP - apenas IPs do Cloudflare
+  dynamic "ingress" {
+    for_each = local.cloudflare_ips
+    content {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
   }
 
   # SSH
