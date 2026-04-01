@@ -81,7 +81,7 @@ Provisioned remotely  — no local state, no hardcoded credentials.
 ├── ansible/
 │   ├── inventory.ini     # EC2 host (IP → Tailscale hostname after Phase 2)
 │   ├── site.yml          # main playbook
-│   ├── group_vars/
+│   ├── group_vars/all/
 │   │   ├── all.yml       # domain, paths, variable references
 │   │   └── vault.yml     # encrypted secrets (Ansible Vault)
 │   └── templates/
