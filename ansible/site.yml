@@ -59,6 +59,11 @@
         name: git
         state: present
 
+    - name: Limpar diretório antes do clone
+      ansible.builtin.file:
+        path: "{{ site_root }}"
+        state: absent
+
     - name: Clonar o repositório do site
       ansible.builtin.git:
         repo: "https://github.com/luisbrancher/luisbrancher.github.io.git"
